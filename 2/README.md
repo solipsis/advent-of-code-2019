@@ -1,3 +1,4 @@
+```
 --- Day 2: 1202 Program Alarm ---
 On the way to your gravity assist around the Moon, your ship computer beeps angrily about a "1202 program alarm". On the radio, an Elf is already explaining how to handle the situation: "Don't worry, that's perfectly norma--" The ship computer bursts into flames.
 
@@ -66,3 +67,4 @@ Once the program has halted, its output is available at address 0, also just lik
 Find the input noun and verb that cause the program to produce the output 19690720. What is 100 * noun + verb? (For example, if noun=12 and verb=2, the answer would be 1202.)
 
 Your puzzle answer was 7621.
+```
