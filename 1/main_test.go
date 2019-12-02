@@ -2,18 +2,8 @@ package main
 
 import (
 	"bytes"
-	"io"
-	"os"
 	"testing"
 )
-
-func open(fname string) io.Reader {
-	f, err := os.Open("input.txt")
-	if err != nil {
-		panic(err)
-	}
-	return f
-}
 
 func TestExampleA(t *testing.T) {
 

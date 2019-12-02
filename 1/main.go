@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
+	"os"
 	"strconv"
 )
 
@@ -43,4 +45,17 @@ func solveB(r io.Reader) int {
 	return sum
 }
 
-func main() {}
+func main() {
+	input := open("input.txt")
+	fmt.Printf("A: %d\n", solveA(input))
+	input = open("input.txt")
+	fmt.Printf("B: %d\n", solveB(input))
+}
+
+func open(fname string) io.Reader {
+	f, err := os.Open("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	return f
+}
