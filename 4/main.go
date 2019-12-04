@@ -41,6 +41,7 @@ func solveB(start, end int) int {
 					for e := d; e < 10; e++ {
 						for f := e; f < 10; f++ {
 
+							// Find a run of exactly length 2
 							run := 1
 							arr := []int{a, b, c, d, e, f}
 							consecutive := false
@@ -76,5 +77,5 @@ func solveB(start, end int) int {
 
 func main() {
 	fmt.Printf("A: %d\n", solveA(125730, 579381))
-	fmt.Printf("A: %d\n", solveB(125730, 579381))
+	fmt.Printf("B: %d\n", solveB(125730, 579381))
 }
