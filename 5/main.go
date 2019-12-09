@@ -19,7 +19,7 @@ const (
 var mode parameterMode = position
 var state []int
 
-func solveA(r io.Reader) int {
+func solveA(r io.Reader, input int) int {
 	sc := bufio.NewScanner(r)
 
 	state = make([]int, 0)
@@ -37,10 +37,6 @@ func solveA(r io.Reader) int {
 
 	pc := 0
 	for {
-		//fmt.Println("----------------------------------------")
-		//fmt.Printf("%v\n", state)
-		//t.Println(pc)
-
 		op := state[pc] % 100
 		m1 := (state[pc] / 100) % 10
 		m2 := (state[pc] / 1000) % 10
@@ -50,23 +46,47 @@ func solveA(r io.Reader) int {
 		fmt.Printf("%v\n", state[pc:pc+4])
 		switch op {
 		case 1:
-			//state[state[pc+3]] = state[state[pc+1]] + state[state[pc+2]]
 			state[state[pc+3]] = fetch(pc+1, m1) + fetch(pc+2, m2)
-			//fmt.Printf("add A: %d, B: %d, C: %d\n", fetch(pc+1, m1), fetch(pc+2, m2), state[pc+3])
 			pc += 4
 			break
 		case 2:
-			//state[state[pc+3]] = state[state[pc+1]] * state[state[pc+2]]
 			state[state[pc+3]] = fetch(pc+1, m1) * fetch(pc+2, m2)
 			pc += 4
 			break
 		case 3:
 			// hard coded input
-			state[state[pc+1]] = 1
+			state[state[pc+1]] = input
 			pc += 2
 		case 4:
 			fmt.Println("OUT:", fetch(pc+1, m1))
 			pc += 2
+		case 5: // jump-if-true
+			if fetch(pc+1, m1) != 0 {
+				pc = fetch(pc+2, m2)
+			} else {
+				pc += 3
+			}
+		case 6: // jump-if-false
+			if fetch(pc+1, m1) == 0 {
+				pc = fetch(pc+2, m2)
+			} else {
+				pc += 3
+			}
+		case 7: // less than
+			if fetch(pc+1, m1) < fetch(pc+2, m2) {
+				state[state[pc+3]] = 1
+			} else {
+				state[state[pc+3]] = 0
+			}
+			pc += 4
+		case 8: // equals
+			if fetch(pc+1, m1) == fetch(pc+2, m2) {
+				state[state[pc+3]] = 1
+			} else {
+				state[state[pc+3]] = 0
+			}
+			pc += 4
+
 		case 99:
 			return state[0]
 		default:
@@ -145,7 +165,7 @@ func open(fname string) io.Reader {
 
 func main() {
 	input := open("input.txt")
-	fmt.Printf("A: %d\n", solveA(input))
+	fmt.Printf("A: %d\n", solveA(input, 5))
 	//input = open("input.txt")
 	//fmt.Printf("B: %d\n", solveB(input))
 }
