@@ -30,8 +30,6 @@ func solveA(r io.Reader) int {
 	var row, col int
 	for sc.Scan() {
 		arr := strings.Split(sc.Text(), "")
-		//fmt.Println(len(arr))
-		//fmt.Println(25 * 6)
 		layer := newLayer(width, height)
 		var c0, c1, c2 int
 		fewest := 9999999
@@ -73,38 +71,6 @@ func solveA(r io.Reader) int {
 			fmt.Printf("row: %d, col: %d\n", row, col)
 		}
 	}
-
-	/*
-		best := 99999999
-		bestIdx := -1
-		for i, layer := range image {
-
-			count := 0
-			for _, r := range image {
-				for _, c := range r {
-					if c == 0 {
-						count++
-					}
-				}
-				if count < best {
-					best = count
-					bestIdx = i
-				}
-			}
-		}
-
-		// # of 1's times # of 2's
-		var c1, c2 int
-		for _, c := range image[bestIdx] {
-			if c == 1 {
-				c1++
-			}
-			if c == 2 {
-				c2++
-			}
-		}
-		return c1 * c2
-	*/
 	return result
 }
 
