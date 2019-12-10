@@ -20,6 +20,7 @@ var mode parameterMode = position
 
 //var state []int
 
+// TODO: convert to "New" style function
 func (a *amplifier) init(program, input []int) {
 	a.state = make([]int, len(program))
 	copy(a.state, program)
