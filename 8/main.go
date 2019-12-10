@@ -74,33 +74,75 @@ func solveA(r io.Reader) int {
 	return result
 }
 
-/*
+type color int
+
+const (
+	black color = iota
+	white
+	transparent
+)
+
 func solveB(r io.Reader) int {
+
 	sc := bufio.NewScanner(r)
 
-	sum := 0
-	for sc.Scan() {
-		i, err := strconv.Atoi(sc.Text())
-		if err != nil {
-			panic(err)
-		}
+	width := 25
+	height := 6
+	image := make([]layer, 0)
 
-		v := i
-		for {
-			v = (v / 3) - 2
-			if v < 0 {
-				break
+	var row, col int
+	for sc.Scan() {
+		arr := strings.Split(sc.Text(), "")
+		layer := newLayer(width, height)
+		for _, v := range arr {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				panic(err)
 			}
-			sum += v
+			layer[row][col] = i
+			col++
+			if col == width {
+				col = 0
+				row++
+			}
+			if row == height {
+				// prepare next layer
+				row = 0
+				image = append(image, layer)
+				layer = newLayer(width, height)
+			}
 		}
 	}
-	return sum
+
+	complete := newLayer(width, height)
+
+	for row := 0; row < height; row++ {
+		for col := 0; col < width; col++ {
+			for lay := 0; lay < len(image); lay++ {
+				if color(image[lay][row][col]) == black || color(image[lay][row][col]) == white {
+					complete[row][col] = image[lay][row][col]
+					break
+				}
+			}
+		}
+	}
+
+	for _, r := range complete {
+		for _, c := range r {
+			fmt.Printf("%d", c)
+		}
+		fmt.Println()
+	}
+
+	return -1
 }
-*/
 
 func main() {
+	//input := open("input.txt")
+	//fmt.Printf("A: %d\n", solveA(input))
+
 	input := open("input.txt")
-	fmt.Printf("A: %d\n", solveA(input))
+	fmt.Printf("B: %d\n", solveB(input))
 }
 
 func open(fname string) io.Reader {
