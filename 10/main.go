@@ -76,25 +76,29 @@ func bfs(row, col int, space [][]rune) int {
 			dy := r - row
 			dx := c - col
 
-			if dx != 0 {
-				rat := big.NewRat(int64(dy), int64(dx))
-
-				if dy == 0 {
-					if dx > 0 {
-						slopes["right"] = true
-					} else if dx < 0 {
-						slopes["left"] = true
-					}
-				} else {
-					slopes[rat.RatString()] = true
-				}
-			} else {
+			if dx == 0 {
 				if dy > 0 {
 					slopes["down"] = true
-				} else if dy < 0 {
+				}
+				if dy < 0 {
 					slopes["up"] = true
 				}
+			} else if dy == 0 {
+				if dx > 0 {
+					slopes["right"] = true
+				}
+				if dx < 0 {
+					slopes["left"] = true
+				}
+			} else {
+				rat := big.NewRat(int64(dy), int64(dx))
+				mod := ">"
+				if dx < 0 {
+					mod = "<"
+				}
+				slopes[rat.RatString()+mod] = true
 			}
+
 		}
 
 		// search 8 surrounding squares
@@ -110,7 +114,7 @@ func bfs(row, col int, space [][]rune) int {
 		}
 		queue = append(queue, points...)
 	}
-	fmt.Printf("r: %d, c: %d, %d -- %+v\n", row, col, len(slopes), slopes)
+	//fmt.Printf("r: %d, c: %d, %d -- %+v\n", row, col, len(slopes), slopes)
 	return len(slopes)
 }
 
