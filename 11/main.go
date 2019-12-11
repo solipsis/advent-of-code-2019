@@ -225,17 +225,32 @@ func solveB(r io.Reader) int {
 	}
 
 	m := make(map[string]int)
-	var x, y int
+	m["10:10"] = 1
+
+	// aribitrarily larger grid for displaying to console
+	x, y := 10, 10
+	var grid [30][60]rune
 
 	c := newCPU(program)
 
-	//c.input = append(c.input, 2)
 	paint := true
 	curDir := 1
 	for {
 		out, err := c.run()
 		switch err {
 		case nil:
+
+			for _, row := range grid {
+				for _, col := range row {
+					if col == 0 {
+						fmt.Printf(" ")
+					} else {
+						fmt.Printf("%s", string(col))
+					}
+				}
+				fmt.Println()
+			}
+
 			return len(m)
 		case errSuspend:
 			// the robot has output a color and needs to move
@@ -244,8 +259,10 @@ func solveB(r io.Reader) int {
 				paint = false
 				if out == 0 {
 					m[fmt.Sprintf("%d:%d", x, y)] = 0
+					grid[y][x] = '.'
 				} else if out == 1 {
 					m[fmt.Sprintf("%d:%d", x, y)] = 1
+					grid[y][x] = '#'
 				}
 			} else {
 				paint = true
@@ -269,10 +286,6 @@ func solveB(r io.Reader) int {
 
 	return -1
 }
-
-//func pointStr(x, y) string {
-//return
-//}
 
 func (c *cpu) set(i, mode, val int) {
 	switch parameterMode(mode) {
@@ -308,5 +321,6 @@ func open(fname string) io.Reader {
 
 func main() {
 	input := open("input.txt")
-	fmt.Printf("A: %d\n", solveA(input))
+	//fmt.Printf("A: %d\n", solveA(input))
+	fmt.Printf("B: %d\n", solveB(input))
 }
