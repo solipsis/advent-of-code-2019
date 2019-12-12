@@ -111,12 +111,59 @@ func applyGravity(bodies []body) {
 }
 
 func solveB(r io.Reader) int {
-	return -1
+
+	sc := bufio.NewScanner(r)
+	// try finding period of each component and multiply?
+
+	var bodies []body
+	for sc.Scan() {
+		// ulitimate lazy input parsing
+		rep := strings.NewReplacer(" ", "", "<", "", ">", "", "=", "", "x", "", "y", "", "z", "")
+		text := rep.Replace(sc.Text())
+		arr := strings.Split(text, ",")
+
+		x, _ := strconv.Atoi(arr[0])
+		y, _ := strconv.Atoi(arr[1])
+		z, _ := strconv.Atoi(arr[2])
+
+		bodies = append(bodies, body{x: x, y: y, z: z})
+	}
+
+	m := make(map[string]int)
+
+	for step := 1; step <= 1000000; step++ {
+		applyGravity(bodies)
+		applyVelocity(bodies)
+
+		// find cycle length of each component
+		s := ":"
+		for _, b := range bodies {
+			// toggle between runs for each component
+			s = s + strconv.Itoa(b.z) + ":" + strconv.Itoa(b.vz) + ":"
+		}
+
+		// we have seen this state before
+		if m[s] != 0 {
+			fmt.Printf("prev: %d, cur: %d, s: %s\n", m[s], step, s)
+			fmt.Println(step - m[s])
+			return -1
+		}
+		m[s] = step
+
+	}
+	// X: 56344
+	// Y: 231614
+	// Z: 193052
+
+	// calc the LCD of those values (1/56344, 1/231614, 1/193052)
+
+	return 314917503970904
 }
 
 func main() {
 	input := open("input.txt")
-	fmt.Printf("A: %d\n", solveA(input))
+	//fmt.Printf("A: %d\n", solveA(input))
+	fmt.Printf("B: %d\n", solveB(input))
 }
 
 func open(fname string) io.Reader {
