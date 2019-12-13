@@ -214,24 +214,20 @@ func solveB(r io.Reader) int {
 
 	output := make([]int, 0)
 	score := 0
-	x := 0
+	loops := 0
 	for {
-
-		x++
+		loops++
 
 		out, err := c.run()
 		switch err {
 		case nil:
 			return score
 		case errSuspend:
-			fmt.Println("output: ", x)
 			// new block coordinates
 			output = append(output, out)
-			fmt.Println("len: ", len(output))
 			if len(output) == 3 {
 				x, y, id := output[0], output[1], output[2]
 				output = nil // reset input buffer
-				fmt.Printf("update X: %d, Y: %d, id: %d\n", x, y, id)
 
 				// update score
 				if x == -1 && y == 0 {
@@ -243,9 +239,8 @@ func solveB(r io.Reader) int {
 				grid[y][x] = id
 			}
 		case errNeedInput:
-			printGrid(grid, score, x)
-			fmt.Println("requesting input")
-			time.Sleep(time.Millisecond * 100)
+			printGrid(grid, score, loops)
+			time.Sleep(time.Millisecond * 20)
 			// find the x coordinate of the ball and paddle
 			var bx, px int
 			for _, row := range grid {
@@ -267,27 +262,6 @@ func solveB(r io.Reader) int {
 				c.input = append(c.input, 0)
 			}
 
-			/*
-				reader := bufio.NewReader(os.Stdin)
-				input, err := reader.ReadString('\n')
-				if err != nil {
-					fmt.Println(errors.New("unable to read user input: " + err.Error()))
-					continue
-				}
-				switch input[0] {
-				case 'a':
-					fmt.Println("left")
-					c.input = append(c.input, -1)
-				case 'd':
-					fmt.Println("right")
-					c.input = append(c.input, 1)
-				default:
-					fmt.Println("neutral")
-					c.input = append(c.input, 0)
-				}
-			*/
-
-			//c.input = append(c.input, m[fmt.Sprintf("%d:%d", x, y)])
 		default:
 			panic(err)
 		}
