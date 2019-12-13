@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type parameterMode int
@@ -177,6 +178,124 @@ func solveA(r io.Reader) int {
 	return -1
 }
 
+func printGrid(grid [25][50]int, score, loops int) {
+
+	fmt.Println("***********************")
+	fmt.Printf("loops: %d, score: %d\n", loops, score)
+	for _, row := range grid {
+		str := ""
+		for _, col := range row {
+			str += strconv.Itoa(col)
+		}
+		fmt.Println(str)
+	}
+}
+
+func solveB(r io.Reader) int {
+	sc := bufio.NewScanner(r)
+
+	program := make([]int, 0)
+
+	for sc.Scan() {
+		nums := strings.Split(sc.Text(), ",")
+		for _, v := range nums {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				panic(err)
+			}
+			program = append(program, i)
+		}
+	}
+
+	var grid [25][50]int
+
+	c := newCPU(program)
+	c.state[0] = 2 // infinite quarters
+
+	output := make([]int, 0)
+	score := 0
+	x := 0
+	for {
+
+		x++
+
+		out, err := c.run()
+		switch err {
+		case nil:
+			return score
+		case errSuspend:
+			fmt.Println("output: ", x)
+			// new block coordinates
+			output = append(output, out)
+			fmt.Println("len: ", len(output))
+			if len(output) == 3 {
+				x, y, id := output[0], output[1], output[2]
+				output = nil // reset input buffer
+				fmt.Printf("update X: %d, Y: %d, id: %d\n", x, y, id)
+
+				// update score
+				if x == -1 && y == 0 {
+					score = id
+					continue
+				}
+
+				// update display
+				grid[y][x] = id
+			}
+		case errNeedInput:
+			printGrid(grid, score, x)
+			fmt.Println("requesting input")
+			time.Sleep(time.Millisecond * 100)
+			// find the x coordinate of the ball and paddle
+			var bx, px int
+			for _, row := range grid {
+				for idx, col := range row {
+					if col == 4 {
+						bx = idx
+					}
+					if col == 3 {
+						px = idx
+					}
+				}
+			}
+
+			if px < bx { // right
+				c.input = append(c.input, 1)
+			} else if px > bx { // left
+				c.input = append(c.input, -1)
+			} else {
+				c.input = append(c.input, 0)
+			}
+
+			/*
+				reader := bufio.NewReader(os.Stdin)
+				input, err := reader.ReadString('\n')
+				if err != nil {
+					fmt.Println(errors.New("unable to read user input: " + err.Error()))
+					continue
+				}
+				switch input[0] {
+				case 'a':
+					fmt.Println("left")
+					c.input = append(c.input, -1)
+				case 'd':
+					fmt.Println("right")
+					c.input = append(c.input, 1)
+				default:
+					fmt.Println("neutral")
+					c.input = append(c.input, 0)
+				}
+			*/
+
+			//c.input = append(c.input, m[fmt.Sprintf("%d:%d", x, y)])
+		default:
+			panic(err)
+		}
+	}
+
+	return -1
+}
+
 func (c *cpu) set(i, mode, val int) {
 	switch parameterMode(mode) {
 	case position:
@@ -211,6 +330,6 @@ func open(fname string) io.Reader {
 
 func main() {
 	input := open("input.txt")
-	fmt.Printf("A: %d\n", solveA(input))
-	//fmt.Printf("B: %d\n", solveB(input))
+	//fmt.Printf("A: %d\n", solveA(input))
+	fmt.Printf("B: %d\n", solveB(input))
 }
