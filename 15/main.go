@@ -147,32 +147,51 @@ func solveA(r io.Reader) int {
 	for i := range grid {
 		grid[i] = make([]int, size)
 	}
-	//x, y := 5, 5
+	visited = make(map[string]bool)
 
 	c := newCPU(program)
 
-	/*
-		c.input = append(c.input, 4)
-		out, err := c.run()
-		fmt.Println(err)
-		fmt.Println(out)
-
-		c.input = append(c.input, 3)
-		out, err = c.run()
-		fmt.Println(err)
-		fmt.Println(out)
-	*/
 	dfs(c, 25, 25, -1)
 	grid[25][25] = 8
 	grid[43][41] = 2
 	printGrid(grid)
 
-	// part 1
 	depth := bfs(grid, 25, 25)
 
-	// part 2
-	depth = bfs(grid, 43, 41)
+	return depth
+}
 
+func solveB(r io.Reader) int {
+	sc := bufio.NewScanner(r)
+
+	program := make([]int, 0)
+
+	for sc.Scan() {
+		nums := strings.Split(sc.Text(), ",")
+		for _, v := range nums {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				panic(err)
+			}
+			program = append(program, i)
+		}
+	}
+
+	size := 50
+	grid = make([][]int, size)
+	for i := range grid {
+		grid[i] = make([]int, size)
+	}
+	visited = make(map[string]bool)
+
+	c := newCPU(program)
+
+	dfs(c, 25, 25, -1)
+	grid[25][25] = 8
+	grid[43][41] = 2
+	printGrid(grid)
+
+	depth := bfs(grid, 43, 41)
 	return depth
 }
 
@@ -183,27 +202,20 @@ var dirXY = map[int][]int{
 	4: {1, 0},
 }
 
-var visited = make(map[string]bool)
+var visited map[string]bool
 
 func dfs(c *cpu, x, y, prevDir int) {
 
-	//vstr :=
-	//fmt.Println("***********************************************")
-	//fmt.Printf("x: %d, y: %d, prev: %d\n", x, y, prevDir)
 	if visited[fmt.Sprintf("(x:%d,y:%d)", x, y)] {
 		panic("visiting same node twice, why?")
 	}
 	visited[fmt.Sprintf("(x:%d,y:%d)", x, y)] = true
 	grid[y][x] = 1
-	//printGrid(grid)
 
 	// NORTH SOUTH WEST EAST
 	dirs := []int{1, 2, 3, 4}
 
 	for _, dir := range dirs {
-
-		// initiate the new movement
-		//fmt.Printf("Input %d\n", dir)
 
 		// skip any square we have already visited
 		nx := x + dirXY[dir][0]
@@ -214,7 +226,6 @@ func dfs(c *cpu, x, y, prevDir int) {
 		c.input = append(c.input, dir)
 
 		out, err := c.run()
-		//fmt.Printf("Response %d\n", out)
 		switch err {
 		case nil:
 
@@ -223,16 +234,11 @@ func dfs(c *cpu, x, y, prevDir int) {
 			switch out {
 			// hit a wall
 			case 0:
-				//fmt.Printf("marking wall: wx: %d, wy: %d, dir: %d\n", nx, ny, dir)
 				grid[ny][nx] = 9
 			// successful move
 			case 1:
 				if grid[ny][nx] == 0 {
-					//fmt.Printf("recursing to nx: %d, ny, dir: %d: %d\n", nx, ny, dir)
 					dfs(c, nx, ny, dir)
-
-					//fmt.Printf("undoing move to nx: %d, ny: %d\n", nx, ny)
-					//c.run()
 				}
 			case 2:
 				fmt.Printf("OXYGEN: x:%d, y:%d\n", nx, ny)
@@ -240,12 +246,9 @@ func dfs(c *cpu, x, y, prevDir int) {
 				dfs(c, nx, ny, dir)
 			default:
 				panic("blah")
-
 			}
 
 		case errNeedInput:
-			// the robot is asking the color of the current tile
-			//c.input = append(c.input, m[fmt.Sprintf("%d:%d", x, y)])
 			panic("this part shouldn't need input?")
 		default:
 			panic(err)
@@ -324,7 +327,6 @@ func bfs(g [][]int, row, col int) int {
 			queue = append(queue, &point{nr, nc})
 			visited[pair] = true
 		}
-		//if
 
 	}
 	return depth
@@ -339,11 +341,6 @@ func printGrid(g [][]int) {
 		fmt.Println()
 	}
 
-}
-
-func solveB(r io.Reader) int {
-
-	return -1
 }
 
 func (c *cpu) set(i, mode, val int) {
@@ -381,5 +378,6 @@ func open(fname string) io.Reader {
 func main() {
 	input := open("input.txt")
 	fmt.Printf("A: %d\n", solveA(input))
-	//fmt.Printf("B: %d\n", solveB(input))
+	input = open("input.txt")
+	fmt.Printf("B: %d\n", solveB(input))
 }
