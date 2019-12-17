@@ -167,7 +167,11 @@ func solveA(r io.Reader) int {
 	grid[43][41] = 2
 	printGrid(grid)
 
+	// part 1
 	depth := bfs(grid, 25, 25)
+
+	// part 2
+	depth = bfs(grid, 43, 41)
 
 	return depth
 }
@@ -270,7 +274,7 @@ func dfs(c *cpu, x, y, prevDir int) {
 	c.run()
 }
 
-func bfs(g [][]int, x, y int) int {
+func bfs(g [][]int, row, col int) int {
 
 	type point struct {
 		row, col int
@@ -281,7 +285,7 @@ func bfs(g [][]int, x, y int) int {
 	depth := 0
 
 	// initial point + depth marker
-	queue := []*point{&point{x, y}, nil}
+	queue := []*point{&point{row, col}, nil}
 	for len(queue) > 1 {
 		// pop
 		next := queue[0]
@@ -290,13 +294,16 @@ func bfs(g [][]int, x, y int) int {
 		// We have hit a depth marker
 		if next == nil {
 			depth++
+			if queue[0] == nil {
+				return depth
+			}
 			queue = append(queue, nil)
 			continue
 		}
 
 		// we found the end
 		if grid[next.row][next.col] == 2 {
-			return depth
+			//return depth
 		}
 
 		dirs := [][]int{
@@ -320,7 +327,7 @@ func bfs(g [][]int, x, y int) int {
 		//if
 
 	}
-	return -1
+	return depth
 }
 
 func printGrid(g [][]int) {
