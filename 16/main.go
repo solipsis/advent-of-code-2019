@@ -52,7 +52,7 @@ func solveA(r io.Reader) string {
 	return res
 }
 
-func solveB(r io.Reader) string {
+func solveB(r io.Reader) int {
 
 	sc := bufio.NewScanner(r)
 
@@ -68,82 +68,38 @@ func solveB(r io.Reader) string {
 		}
 	}
 
+	// duplicate input 10k times
 	cpy := make([]int, len(nums))
 	copy(cpy, nums)
 	for x := 1; x < 10000; x++ {
 		nums = append(nums, cpy...)
 	}
-	//fmt.Printf("Start %v\n", nums)
 
-	//startPattern := []int{0, 1, 0, -1}
-
-	// 77911632 too low
 	//offset := 303673
 	offset := 5975677
-	fmt.Println(len(nums))
-	fmt.Println(offset)
-	fmt.Println(len(nums) - offset)
-	fmt.Printf("nums: %v", nums[offset:offset+8])
-	//offset := 308177
+
+	// the first n-1 values will all be zeroes
+	// and the coefficient for all values after will be 1
 
 	next := make([]int, len(nums))
 	for z := 0; z < 100; z++ {
-		//fmt.Printf("DAVE: %v\n", nums[offset:offset+8])
-
-		/*
-			prefixSum := 0
-			for _, v := range nums[offset+8:] {
-				fmt.Println(v)
-				prefixSum = (prefixSum + v) % 10
-				fmt.Println("x:", prefixSum)
-			}
-			8?
-			//for w := len(nums) - 1; w >= offset+8; w-- {
-			//prefixSum = (prefixSum + nums[w]) % 10
-			//}
-		*/
-
 		prefixSum := 0
+		// iterate in reverse to avoid duplicate computation
 		for w := len(nums) - 1; w >= offset; w-- {
 			next[w] = (prefixSum + nums[w]) % 10
 			prefixSum = next[w]
 		}
-
-		/*
-			fmt.Println("z: ", z)
-			fmt.Println("prefixSum: ", prefixSum)
-			for i := offset; i < len(nums); i++ {
-				//for idx := range nums {
-				//x := 1
-				//pat := expandPattern(startPattern, y+1)
-				//fmt.Printf("%v\n", pat)
-				updated := 0
-				for j := i; j < offset+8; j++ {
-					//fmt.Printf("|%d*%d |", 1, j)
-					//updated = (updated + (pat[x] * v))
-					//x = (x + 1) % len(pat)
-					updated = (updated + nums[j]) % 10
-				}
-				next[i] = (updated + prefixSum) % 10
-			}
-		*/
 		nums = next
-		fmt.Printf("%v\n", nums[offset:offset+8])
 	}
 
-	//res := ""
-	//for _, v := range nums[:7] {
-	//res += strconv.Itoa(v)
-	//}
-	fmt.Printf("test %v\n", nums[:16])
-	//offset, _ := strconv.Atoi(res)
-	//fmt.Println("offset:", offset)
-	fmt.Println("length: ", len(nums))
+	// turn list into number
+	res := 0
+	for _, v := range nums[offset : offset+8] {
+		res += v
+		res *= 10
+	}
 
-	fmt.Printf("%v\n", nums[offset:offset+8])
-	//return nums[offset : offset+8]
-	return "blah"
-	//return res
+	return res / 10
 
 }
 
