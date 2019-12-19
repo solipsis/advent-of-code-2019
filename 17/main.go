@@ -141,6 +141,8 @@ func solveA(r io.Reader) int {
 			program = append(program, i)
 		}
 	}
+	// part 1
+	program[0] = 1
 
 	c := newCPU(program)
 
@@ -153,21 +155,7 @@ func solveA(r io.Reader) int {
 			done = true
 
 		case errSuspend:
-			//fmt.Println("suspend, out:", out)
 			buf = append(buf, byte(out))
-			//fmt.Printf("%s", string(rune(out)))
-			/*
-				// movement response
-				switch out {
-				// hit a wall
-				case 0:
-				// successful move
-				case 1:
-				case 2:
-				default:
-					panic("blah")
-				}
-			*/
 
 		case errNeedInput:
 			fmt.Println("input")
@@ -177,7 +165,6 @@ func solveA(r io.Reader) int {
 		}
 	}
 
-	// 6476 too high
 	var grid [][]string
 	lines := strings.Split(string(buf), "\n")
 	for _, l := range lines {
@@ -187,13 +174,6 @@ func solveA(r io.Reader) int {
 		}
 	}
 
-	// input
-	mainIn := strings.Split("C,A,C,B,C,A,B,B,C,A\n", "")
-	inA := strings.Split("R12,R8,L8,L12\n", "")
-	inB := strings.Split("L12,L10,L8\n", "")
-	inC := strings.Split("R8,L10,R8\n", "")
-
-	//fmt.Printf("%v\n", grid)
 	sum := 0
 	for row := 0; row < len(grid); row++ {
 		for col := 0; col < len(grid[0]); col++ {
@@ -232,162 +212,79 @@ func solveA(r io.Reader) int {
 		}
 	}
 
-	fmt.Println("***********************************8")
-	//fmt.Printf("%v\n", grid)
-
 	return sum
 }
 
 func solveB(r io.Reader) int {
-	return -1
-}
+	sc := bufio.NewScanner(r)
 
-var dirXY = map[int][]int{
-	1: {0, -1},
-	2: {0, 1},
-	3: {-1, 0},
-	4: {1, 0},
-}
+	program := make([]int, 0)
 
-var visited map[string]bool
-
-func dfs(c *cpu, x, y, prevDir int) {
-
-	if visited[fmt.Sprintf("(x:%d,y:%d)", x, y)] {
-		panic("visiting same node twice, why?")
-	}
-	visited[fmt.Sprintf("(x:%d,y:%d)", x, y)] = true
-	grid[y][x] = 1
-
-	// NORTH SOUTH WEST EAST
-	dirs := []int{1, 2, 3, 4}
-
-	for _, dir := range dirs {
-
-		// skip any square we have already visited
-		nx := x + dirXY[dir][0]
-		ny := y + dirXY[dir][1]
-		if grid[ny][nx] != 0 {
-			continue
+	for sc.Scan() {
+		nums := strings.Split(sc.Text(), ",")
+		for _, v := range nums {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				panic(err)
+			}
+			program = append(program, i)
 		}
-		c.input = append(c.input, dir)
+	}
+	// part 2
+	program[0] = 2
 
+	c := newCPU(program)
+
+	// input. TODO: find much better way to express this
+	mainIn := "C,A,C,B,C,A,B,B,C,A\n"
+	inA := []int{'R', ',', '1', '2', ',', 'R', ',', '8', ',', 'L', ',', '8', ',', 'L', ',', '1', '2', '\n'}
+	inB := []int{'L', ',', '1', '2', ',', 'L', ',', '1', '0', ',', 'L', ',', '8', '\n'}
+	inC := []int{'R', ',', '8', ',', 'L', ',', '1', '0', ',', 'R', ',', '8', '\n'}
+	for _, r := range mainIn {
+		c.input = append(c.input, int(r))
+	}
+	for _, r := range inA {
+		c.input = append(c.input, int(r))
+	}
+	for _, r := range inB {
+		c.input = append(c.input, int(r))
+	}
+	for _, r := range inC {
+		c.input = append(c.input, int(r))
+	}
+
+	// video feed yes / no
+	c.input = append(c.input, []int{'n', '\n'}...)
+
+	buf := make([]byte, 0)
+	var done bool
+	var lastOutput int
+	for !done {
 		out, err := c.run()
 		switch err {
 		case nil:
+			return lastOutput
 
 		case errSuspend:
-			// movement response
-			switch out {
-			// hit a wall
-			case 0:
-				grid[ny][nx] = 9
-			// successful move
-			case 1:
-				if grid[ny][nx] == 0 {
-					dfs(c, nx, ny, dir)
-				}
-			case 2:
-				fmt.Printf("OXYGEN: x:%d, y:%d\n", nx, ny)
-				grid[ny][nx] = 2
-				dfs(c, nx, ny, dir)
-			default:
-				panic("blah")
+			lastOutput = out
+
+			// camera mode
+			if out == '\n' && buf[len(buf)-1] == '\n' {
+				fmt.Println(string(buf))
+				buf = make([]byte, 0)
 			}
 
+			buf = append(buf, byte(out))
+
 		case errNeedInput:
+			fmt.Println("input")
 			panic("this part shouldn't need input?")
 		default:
 			panic(err)
 		}
 	}
 
-	if prevDir == -1 {
-		return
-	}
-	// Undo the move that got us here
-	var reverse int
-	switch prevDir {
-	case 1:
-		reverse = 2
-	case 2:
-		reverse = 1
-	case 3:
-		reverse = 4
-	case 4:
-		reverse = 3
-	default:
-		panic("how did this happen")
-	}
-	//fmt.Println("REVERSE")
-	c.input = append(c.input, reverse)
-	c.run()
-}
-
-func bfs(g [][]int, row, col int) int {
-
-	type point struct {
-		row, col int
-	}
-
-	visited := make(map[string]bool)
-
-	depth := 0
-
-	// initial point + depth marker
-	queue := []*point{&point{row, col}, nil}
-	for len(queue) > 1 {
-		// pop
-		next := queue[0]
-		queue = queue[1:]
-
-		// We have hit a depth marker
-		if next == nil {
-			depth++
-			if queue[0] == nil {
-				return depth
-			}
-			queue = append(queue, nil)
-			continue
-		}
-
-		// we found the end
-		if grid[next.row][next.col] == 2 {
-			//return depth
-		}
-
-		dirs := [][]int{
-			[]int{0, -1},
-			[]int{0, 1},
-			[]int{-1, 0},
-			[]int{1, 0},
-		}
-		// enqueue children
-		for _, dir := range dirs {
-			nr := next.row + dir[0]
-			nc := next.col + dir[1]
-
-			pair := fmt.Sprintf("row%s:col%s", nr, nc)
-			if visited[pair] || grid[nr][nc] == 9 || grid[nr][nc] == 0 {
-				continue
-			}
-			queue = append(queue, &point{nr, nc})
-			visited[pair] = true
-		}
-
-	}
-	return depth
-}
-
-func printGrid(g [][]int) {
-	//fmt.Printf("%v\n", visited)
-	for _, r := range grid {
-		for _, c := range r {
-			fmt.Printf("%s", string(rune(c)))
-		}
-		fmt.Println()
-	}
-
+	return -1
 }
 
 func (c *cpu) set(i, mode, val int) {
