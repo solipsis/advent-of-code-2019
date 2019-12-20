@@ -27,17 +27,7 @@ func solveB(r io.Reader) int {
 		}
 	}
 
-	sum := 0
-
-	// if row col == 1
-	// check +99 in all directions
-	// increase row by 1
-	// increase col until match
-	// repeat
-
 	c := newCPU(program)
-	//coords := []int{}
-	// construct input
 
 	size := 99
 
@@ -66,6 +56,7 @@ func solveB(r io.Reader) int {
 					colStart = col
 				}
 
+				// check size x size grid
 				// right
 				c = newCPU(program)
 				c.input = append(c.input, []int{col + size, row}...)
@@ -79,6 +70,7 @@ func solveB(r io.Reader) int {
 				c.input = append(c.input, []int{col + size, row + size}...)
 				rd, _ := c.run()
 
+				// we found the solution
 				if r == 1 && d == 1 && rd == 1 {
 					return (col * 10000) + row
 				}
@@ -103,9 +95,6 @@ func solveB(r io.Reader) int {
 			prevRes = out
 
 		case errNeedInput:
-			//c.input = append(c.input, coords[0])
-			//prev = append(prev, coords[0])
-			//coords = coords[1:]
 			panic("shouldn't need more input?")
 
 		default:
